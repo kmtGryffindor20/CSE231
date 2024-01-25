@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #define MAX_COMMAND_LENGTH 100
 #define MAX_HISTORY_SIZE 100
@@ -180,6 +181,10 @@ int main() {
                 }
                 token = strtok(NULL, " ");
             }
+        }
+        // Implement interrupt signal
+        if (strcmp(command, "^C") == 0) {
+            raise(SIGINT);
         }
 
         // If history size exceeds MAX_HISTORY_SIZE, remove the oldest command
