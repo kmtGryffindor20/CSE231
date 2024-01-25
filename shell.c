@@ -130,16 +130,22 @@ void executeCommand(char* command) {
     }
 }
 
+void handleInterrupt(int sig) {
+    printf("Interrupt signal received\n");
+}
+
 int main() {
     char* history[MAX_HISTORY_SIZE];
     int historyCount = 0;
     int variableCount = 0;
     Variable variables[MAX_VARIABLES];
+    signal(SIGINT, handleInterrupt);
 
     while (1) {
         char command[MAX_COMMAND_LENGTH];
         printf(">> ");
         fgets(command, MAX_COMMAND_LENGTH, stdin);
+        fflush(stdin);
 
         // Remove newline character from the command
         command[strcspn(command, "\n")] = '\0';
@@ -207,7 +213,12 @@ int main() {
             if (token == NULL) {
                 printf("cd: missing operand\n");
             } else {
-                chdir(token);
+                if(chdir(token) != 0) {
+                    perror("chdir");
+                }
+                else {
+                    printf("Directory changed to %s\n", token);
+                }
             }
         }
         // Handle !n command
