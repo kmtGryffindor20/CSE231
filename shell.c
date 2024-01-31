@@ -131,8 +131,21 @@ void executeCommand(char* command) {
 }
 
 void handleInterrupt(int sig) {
-    printf("Interrupt signal received\n");
+    // interrupt current process
+    printf("Interrupt\n");
+    fflush(stdin);
+    fflush(stdout);
+    
 }
+
+void handleStop(int sig) {
+    // stop current process
+    printf("Stop\n");
+    fflush(stdin);
+    fflush(stdout);
+    kill(getpid(), SIGSTOP);
+}
+
 
 int main() {
     char* history[MAX_HISTORY_SIZE];
@@ -140,6 +153,7 @@ int main() {
     int variableCount = 0;
     Variable variables[MAX_VARIABLES];
     signal(SIGINT, handleInterrupt);
+    signal(SIGTSTP, handleStop);
 
     while (1) {
         char command[MAX_COMMAND_LENGTH];
@@ -188,11 +202,6 @@ int main() {
                 token = strtok(NULL, " ");
             }
         }
-        // Implement interrupt signal
-        if (strcmp(command, "^C") == 0) {
-            raise(SIGINT);
-        }
-
         // If history size exceeds MAX_HISTORY_SIZE, remove the oldest command
         if (historyCount > MAX_HISTORY_SIZE) {
             free(history[0]);
