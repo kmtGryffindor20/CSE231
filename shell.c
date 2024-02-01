@@ -132,7 +132,7 @@ void executeCommand(char* command) {
 
 void handleInterrupt(int sig) {
     // interrupt current process
-    printf("Interrupt\n");
+    printf("Interrupt\n>> ");
     fflush(stdin);
     fflush(stdout);
     
