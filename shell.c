@@ -135,7 +135,7 @@ void handleInterrupt(int sig) {
     printf("Interrupt\n>> ");
     fflush(stdin);
     fflush(stdout);
-    
+    return;
 }
 
 void handleStop(int sig) {
