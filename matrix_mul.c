@@ -1,16 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <time.h>
+#include <sys/time.h>
 
-#define M 3
-#define K 2
-#define N 3
+#define M 5
+#define K 5
+#define N 5
 
-int A[M][K] = {{1, 4}, {2, 5}, {3, 6}};
-int B[K][N] = {{8, 7, 6}, {5, 4, 3}};
+int A[M][K];
+int B[K][N];
 int C[M][N];
 int D[M][N];
+
+void fillMatrix(){
+    for(int i = 0; i < M; i++){
+        for(int j = 0; j < K; j++){
+            A[i][j] = rand() % 100;
+        }
+    }
+    for(int i = 0; i < K; i++){
+        for(int j = 0; j < N; j++){
+            B[i][j] = rand() % 100;
+        }
+    }
+}
+
+void printMatrix() {
+    printf("Matrix A:\n");
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < K; j++) {
+            printf("%d ", A[i][j]);
+        }
+        printf("\n");
+    }
+    printf("Matrix B:\n");
+    for (int i = 0; i < K; i++) {
+        for (int j = 0; j < N; j++) {
+            printf("%d ", B[i][j]);
+        }
+        printf("\n");
+    }
+}
 
 typedef struct {
     int i;
@@ -48,6 +78,10 @@ void* _multiply(void *args) {
 }
 
 int main() {
+    fillMatrix();
+
+    printMatrix();
+    
     pthread_t threads[M * N];
     int count = 0;
     for (int i = 0; i < M; i++) {
@@ -73,10 +107,11 @@ int main() {
     // Using multiple threads
     int MAX_THREADS = M*N;
     int num_threads = 1;
+    double time_taken[MAX_THREADS];
     while(num_threads <= MAX_THREADS)
     {
-        clock_t start_time, end_time;
-        start_time = clock();
+        struct timeval start_time_tv, end_time_tv;
+        gettimeofday(&start_time_tv, NULL);
         pthread_t _threads[num_threads];
         _Args _args[num_threads];
         for (int i = 0; i < num_threads; i++) {
@@ -87,9 +122,20 @@ int main() {
         for (int i = 0; i < num_threads; i++) {
             pthread_join(_threads[i], NULL);
         }
-        end_time = clock();
-        printf("Time taken for %d threads: %fs\n", num_threads, (double)(end_time - start_time) / CLOCKS_PER_SEC);
+        gettimeofday(&end_time_tv, NULL);
+        time_taken[num_threads - 1] = (double)(end_time_tv.tv_usec - start_time_tv.tv_usec) / 1e6 + (end_time_tv.tv_sec - start_time_tv.tv_sec);
         num_threads++;
     }
+    // Find the best number of threads
+    int best_threads = 1;
+    double best_time = time_taken[0];
+    for (int i = 1; i < MAX_THREADS; i++) {
+        if (time_taken[i] < time_taken[best_threads - 1]) {
+            best_threads = i + 1;
+            best_time = time_taken[i];
+        }
+    }
+    printf("Best number of threads: %d\n", best_threads);
+    printf("Time taken for %d threads: %fs\n", best_threads, best_time);
     return 0;
 }
