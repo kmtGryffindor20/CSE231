@@ -3,9 +3,9 @@
 #include <pthread.h>
 #include <sys/time.h>
 
-#define M 5
-#define K 5
-#define N 5
+#define M 10
+#define K 2
+#define N 10
 
 int A[M][K];
 int B[K][N];
@@ -82,35 +82,37 @@ int main() {
 
     printMatrix();
     
-    pthread_t threads[M * N];
-    int count = 0;
-    for (int i = 0; i < M; i++) {
-        for (int j = 0; j < N; j++) {
-            Args *args = (Args*)malloc(sizeof(Args));
-            args->i = i;
-            args->j = j;
-            pthread_create(&threads[count], NULL, multiply, args);
-            count++;
-        }
-    }
-    for (int i = 0; i < M * N; i++) {
-        pthread_join(threads[i], NULL);
-    }
-    printf("Product of the matrices:\n");
-    for (int i = 0; i < M; i++) {
-        for (int j = 0; j < N; j++) {
-            printf("%d ", C[i][j]);
-        }
-        printf("\n");
-    }
+    // pthread_t threads[M * N];
+    // int count = 0;
+    // for (int i = 0; i < M; i++) {
+    //     for (int j = 0; j < N; j++) {
+    //         Args *args = (Args*)malloc(sizeof(Args));
+    //         args->i = i;
+    //         args->j = j;
+    //         pthread_create(&threads[count], NULL, multiply, args);
+    //         count++;
+    //     }
+    // }
+    // for (int i = 0; i < M * N; i++) {
+    //     pthread_join(threads[i], NULL);
+    // }
+    // printf("Product of the matrices:\n");
+    // for (int i = 0; i < M; i++) {
+    //     for (int j = 0; j < N; j++) {
+    //         printf("%d ", C[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     // Using multiple threads
     int MAX_THREADS = M*N;
     int num_threads = 1;
     double time_taken[MAX_THREADS];
+    struct timeval before_time_tv;
+    gettimeofday(&before_time_tv, NULL);
     while(num_threads <= MAX_THREADS)
     {
-        struct timeval start_time_tv, end_time_tv;
+        struct timeval start_time_tv, end_time_tv, present_time_tv;
         gettimeofday(&start_time_tv, NULL);
         pthread_t _threads[num_threads];
         _Args _args[num_threads];
@@ -125,6 +127,20 @@ int main() {
         gettimeofday(&end_time_tv, NULL);
         time_taken[num_threads - 1] = (double)(end_time_tv.tv_usec - start_time_tv.tv_usec) / 1e6 + (end_time_tv.tv_sec - start_time_tv.tv_sec);
         num_threads++;
+        int progress = (int)((double)num_threads / (MAX_THREADS+1) * 100);
+        // prints progress number of hashes enclosed in square brackets
+        char progress_bar[102] = {0};
+        for (int i = 0; i < 100; i++) {
+            if (i < progress) {
+                progress_bar[i] = '#';
+            } else {
+                progress_bar[i] = ' ';
+            }
+        }
+        gettimeofday(&present_time_tv, NULL);
+        double present_time = (double)(present_time_tv.tv_usec - before_time_tv.tv_usec) / 1e6 + (present_time_tv.tv_sec - before_time_tv.tv_sec);
+        printf("\r[%s] %d%%; %fs", progress_bar, progress, present_time);
+        fflush(stdout);
     }
     // Find the best number of threads
     int best_threads = 1;
@@ -135,7 +151,16 @@ int main() {
             best_time = time_taken[i];
         }
     }
-    printf("Best number of threads: %d\n", best_threads);
+
+    // printf("Product of the matrices:\n");
+    // for (int i = 0; i < M; i++) {
+    //     for (int j = 0; j < N; j++) {
+    //         printf("%d ", D[i][j]);
+    //     }
+    //     printf("\n");
+    // }
+
+    printf("\nBest number of threads: %d\n", best_threads);
     printf("Time taken for %d threads: %fs\n", best_threads, best_time);
     return 0;
 }
