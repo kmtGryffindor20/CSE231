@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include <string.h>
 
-#define M 10
-#define K 2
-#define N 10
+#define M 1000
+#define K 1000
+#define N 1000
 
 int A[M][K];
 int B[K][N];
@@ -13,6 +14,7 @@ int C[M][N];
 int D[M][N];
 
 void fillMatrix(){
+    srand(101);
     for(int i = 0; i < M; i++){
         for(int j = 0; j < K; j++){
             A[i][j] = rand() % 100;
@@ -77,10 +79,60 @@ void* _multiply(void *args) {
     pthread_exit(0);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    int MAX_THREADS = 0;
+    int num_threads = 1;
+    if (argc == 1)
+    {
+        MAX_THREADS = N*M;
+    }
+    else if (argc == 2){
+        if(strcmp(argv[1], "--help") == 0)
+        {
+            printf("Usage: %s [-a] [max|num_threads] for only num_threads.\n", argv[0]);
+            printf("Or: %s for running from 1 to max threads.\n", argv[0]);
+            printf("Or: %s [num_threads] for running from 1 to num_threads.\n", argv[0]);
+            printf("Or: %s [-r] [from] [to] for running from from to to threads.\n", argv[0]);
+            printf("Options:\n");
+            printf("  -a\t\tRun for all threads from 1 to max\n");
+            printf("  max\t\tRun for max number of threads\n");
+            printf("  num_threads\tRun for num_threads\n");
+            printf("  -r\t\tRun for threads from [from] to [to]\n");
+            return 0;
+        }
+        MAX_THREADS = atoi(argv[1]);
+    }
+    else if (argc == 3)
+    {
+        if (strcmp(argv[1], "-a") != 0)
+        {
+            fprintf(stderr, "usage: %s [-a] [max|num_threads]\n", argv[0]);
+            return 1;
+        }
+        if(strcmp(argv[2], "max") == 0)
+        {
+            MAX_THREADS = N*M;
+            num_threads = MAX_THREADS;
+        }
+        else{
+
+        MAX_THREADS = atoi(argv[2]);
+        num_threads = atoi(argv[2]);
+        }
+    }
+    else if(argc == 4)
+    {
+        if (strcmp(argv[1], "-r") != 0)
+        {
+            fprintf(stderr, "usage: %s [-a] [from] [to]\n", argv[0]);
+            return 1;
+        }
+        MAX_THREADS = atoi(argv[3]);
+        num_threads = atoi(argv[2]);
+    }
     fillMatrix();
 
-    printMatrix();
+    // printMatrix();
     
     // pthread_t threads[M * N];
     // int count = 0;
@@ -105,8 +157,12 @@ int main() {
     // }
 
     // Using multiple threads
-    int MAX_THREADS = M*N;
-    int num_threads = 1;
+    
+    if(argc == 3)
+    {
+        printf("Running only for %d threads\n", MAX_THREADS);
+    }
+    int initial_num_threads = num_threads;
     double time_taken[MAX_THREADS];
     struct timeval before_time_tv;
     gettimeofday(&before_time_tv, NULL);
@@ -127,7 +183,7 @@ int main() {
         gettimeofday(&end_time_tv, NULL);
         time_taken[num_threads - 1] = (double)(end_time_tv.tv_usec - start_time_tv.tv_usec) / 1e6 + (end_time_tv.tv_sec - start_time_tv.tv_sec);
         num_threads++;
-        int progress = (int)((double)num_threads / (MAX_THREADS+1) * 100);
+        int progress = (int)((double)(num_threads -initial_num_threads + 1) / (MAX_THREADS - initial_num_threads + 2) * 100);
         // prints progress number of hashes enclosed in square brackets
         char progress_bar[102] = {0};
         for (int i = 0; i < 100; i++) {
@@ -143,13 +199,23 @@ int main() {
         fflush(stdout);
     }
     // Find the best number of threads
-    int best_threads = 1;
-    double best_time = time_taken[0];
-    for (int i = 1; i < MAX_THREADS; i++) {
-        if (time_taken[i] < time_taken[best_threads - 1]) {
+    if (argc != 3)
+    {
+
+    int best_threads = initial_num_threads - 1;
+    double best_time = time_taken[initial_num_threads - 1];
+    for (int i = initial_num_threads - 1; i < MAX_THREADS; i++) {
+        if (time_taken[i] < time_taken[best_threads]) {
             best_threads = i + 1;
             best_time = time_taken[i];
         }
+    }
+    printf("\nBest number of threads: %d\n", best_threads);
+    printf("Time taken for %d threads: %fs\n", best_threads, best_time);
+    }
+    else
+    {
+        printf("\n");
     }
 
     // printf("Product of the matrices:\n");
@@ -159,8 +225,7 @@ int main() {
     //     }
     //     printf("\n");
     // }
+    printf("\n");
 
-    printf("\nBest number of threads: %d\n", best_threads);
-    printf("Time taken for %d threads: %fs\n", best_threads, best_time);
     return 0;
 }
