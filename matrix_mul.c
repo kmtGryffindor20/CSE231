@@ -44,20 +44,20 @@ void printMatrix() {
     }
 }
 
-typedef struct {
-    int i;
-    int j;
-} Args;
+// typedef struct {
+//     int i;
+//     int j;
+// } Args;
 
-void* multiply(void *args) {
-    Args *arg = (Args*)args;
-    int sum = 0;
-    for (int k = 0; k < K; k++) {
-        sum += A[arg->i][k] * B[k][arg->j];
-    }
-    C[arg->i][arg->j] = sum;
-    pthread_exit(0);
-}
+// void* multiply(void *args) {
+//     Args *arg = (Args*)args;
+//     int sum = 0;
+//     for (int k = 0; k < K; k++) {
+//         sum += A[arg->i][k] * B[k][arg->j];
+//     }
+//     C[arg->i][arg->j] = sum;
+//     pthread_exit(0);
+// }
 
 typedef struct {
     int this_thread_index;
