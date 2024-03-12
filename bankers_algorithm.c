@@ -83,15 +83,6 @@ int findSafeSequence(int available[], int max[][MAX_RESOURCES], int allocation[]
 
 
 int main() {
-    // int available[MAX_RESOURCES];
-    // int max[MAX_PROCESSES][MAX_RESOURCES];
-    // int allocation[MAX_PROCESSES][MAX_RESOURCES];
-    // int need[MAX_PROCESSES][MAX_RESOURCES];
-    // int numProcesses, numResources;
-    // int i, j, k;
-    // int recoveryCost[MAX_PROCESSES];
-    // int timesPrempted[MAX_PROCESSES];
-    // int isSafe = 0;
     int numProcesses = 5;
     int numResources = 3;
     int available[] = {0, 0, 0};
@@ -117,32 +108,8 @@ int main() {
     int unsafeProcesses[MAX_PROCESSES];
 
 
-    // printf("Enter the number of processes: ");
-    // scanf("%d", &numProcesses);
-
-    // printf("Enter the number of resources: ");
-    // scanf("%d", &numResources);
-
-    // printf("Enter the available resources: ");
-    // for (i = 0; i < numResources; i++) {
-    //     scanf("%d", &available[i]);
-    // }
-
-    // printf("Enter the maximum resource allocation for each process: ");
-    // for (i = 0; i < numProcesses; i++) {
-    //     for (j = 0; j < numResources; j++) {
-    //         scanf("%d", &max[i][j]);
-    //     }
-    // }
-
-    // printf("Enter the resource allocation for each process: ");
-    // for (i = 0; i < numProcesses; i++) {
-    //     for (j = 0; j < numResources; j++) {
-    //         scanf("%d", &allocation[i][j]);
-    //         need[i][j] = max[i][j] - allocation[i][j];
-    //     }
-    // }
-     for (i = 0; i < numProcesses; i++) {
+    
+    for (i = 0; i < numProcesses; i++) {
         for (j = 0; j < numResources; j++) {
             need[i][j] = max[i][j] - allocation[i][j];
         }
