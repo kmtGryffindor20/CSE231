@@ -128,7 +128,7 @@ int main() {
             if (unsafeProcesses[i]) {
                 recoveryCost[i] = 0;
                 for (j = 0; j < numResources; j++) {
-                    recoveryCost[i] += need[i][j];
+                    recoveryCost[i] += allocation[i][j];
                 }
                 recoveryCost[i] /= (timesPrempted[i] + 1);
             }
